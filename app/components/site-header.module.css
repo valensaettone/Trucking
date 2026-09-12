@@ -1,0 +1,223 @@
+.header {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 100;
+  color: var(--text-invert);
+  transition:
+    background 0.4s var(--ease-out),
+    color 0.4s var(--ease-out),
+    box-shadow 0.4s var(--ease-out);
+}
+
+.header[data-solid="true"] {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: saturate(1.6) blur(14px);
+  color: var(--text);
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding: clamp(1rem, 2.4vh, 1.4rem) var(--gutter);
+}
+
+/* ---- Brand -------------------------------------------------------- */
+
+.brand {
+  /* Lockup is 700x307 (2.28:1). It stacks the wordmark under the mark, so
+     it needs real height before "Reliance Express" becomes legible. */
+  --logo-h: clamp(2.75rem, 5.5vw, 3.5rem);
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  /* Reserve the box so the two stacked variants cannot shift the layout. */
+  width: calc(var(--logo-h) * 2.28);
+  height: var(--logo-h);
+}
+
+.logo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.logoLight {
+  opacity: 1;
+}
+
+.logoDark {
+  opacity: 0;
+}
+
+.header[data-solid="true"] .logoLight {
+  opacity: 0;
+}
+
+.header[data-solid="true"] .logoDark {
+  opacity: 1;
+}
+
+
+/* ---- Nav ---------------------------------------------------------- */
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+.nav ul {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.25rem, 2.6vw, 2.25rem);
+}
+
+.nav ul a {
+  position: relative;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  opacity: 0.85;
+  transition: opacity 0.2s var(--ease-out);
+}
+
+.nav ul a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.35rem;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale 0.3s var(--ease-out);
+}
+
+.nav ul a:hover {
+  opacity: 1;
+}
+
+.nav ul a:hover::after {
+  scale: 1 1;
+}
+
+.quote {
+  padding: 0.6rem 1.15rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  transition:
+    background 0.25s var(--ease-out),
+    color 0.25s var(--ease-out),
+    border-color 0.25s var(--ease-out);
+}
+
+.quote:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---- Mobile ------------------------------------------------------- */
+
+.toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-right: -0.5rem;
+}
+
+.toggle span {
+  display: block;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform 0.3s var(--ease-out);
+}
+
+@media (max-width: 820px) {
+  .toggle {
+    display: flex;
+  }
+
+  .nav {
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0 var(--gutter);
+    background: var(--ink);
+    color: var(--text-invert);
+    overflow: hidden;
+    max-height: 0;
+    transition:
+      max-height 0.45s var(--ease-out),
+      padding 0.45s var(--ease-out);
+  }
+
+  .header[data-open="true"] .nav {
+    max-height: 22rem;
+    padding-block: 1.25rem 1.75rem;
+  }
+
+  .nav ul {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .nav ul a {
+    display: block;
+    padding-block: 0.9rem;
+    border-bottom: 1px solid var(--line-invert);
+    font-size: 1.0625rem;
+  }
+
+  .nav ul a::after {
+    display: none;
+  }
+
+  .quote {
+    margin-top: 1.25rem;
+    text-align: center;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .header[data-open="true"] .toggle span:first-child {
+    transform: translateY(4px) rotate(45deg);
+  }
+
+  .header[data-open="true"] .toggle span:last-child {
+    transform: translateY(-4px) rotate(-45deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header,
+  .nav,
+  .nav ul a,
+  .nav ul a::after,
+  .quote,
+  .toggle span {
+    transition: none;
+  }
+}

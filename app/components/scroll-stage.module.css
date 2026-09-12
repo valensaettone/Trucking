@@ -1,0 +1,363 @@
+/* ------------------------------------------------------------------ *
+ * Scroll-scrubbed video stage.
+ * The section is tall; the viewport inside it sticks for the duration,
+ * and scroll progress across the section is mapped onto the video
+ * timeline by `scroll-stage.tsx`.
+ * ------------------------------------------------------------------ */
+
+.stage {
+  position: relative;
+  /* ~62vh of scroll per second of footage. */
+  height: 620vh;
+  background: var(--ink);
+}
+
+.viewport {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0b0f14;
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The clip is shot bright; pull it down so white type always reads. */
+  filter: saturate(0.92) contrast(1.04) brightness(0.88);
+  will-change: contents;
+}
+
+/* Static cinematic grade: vignette + a warm-to-cool lift. */
+.grade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 90% at 50% 45%,
+      transparent 35%,
+      rgba(4, 8, 13, 0.5) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(4, 8, 13, 0.72) 0%,
+      rgba(4, 8, 13, 0.12) 38%,
+      transparent 62%
+    );
+}
+
+/* Dynamic scrim: deepens only while copy is on screen. */
+.scrim {
+  --scrim: 0;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--scrim);
+  background: linear-gradient(
+    100deg,
+    rgba(4, 8, 13, 0.88) 0%,
+    rgba(4, 8, 13, 0.74) 32%,
+    rgba(4, 8, 13, 0.28) 66%,
+    rgba(4, 8, 13, 0.1) 100%
+  );
+}
+
+/* ---- Copy layer --------------------------------------------------- */
+
+.copy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding-inline: var(--gutter);
+  padding-block: clamp(5rem, 14vh, 9rem);
+  color: var(--text-invert);
+}
+
+/* All four phases are stacked in the same grid cell and cross-faded. */
+.copyInner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+}
+
+.phase {
+  --vis: 0;
+  grid-area: 1 / 1;
+  display: grid;
+  gap: clamp(1rem, 2.2vh, 1.6rem);
+  justify-items: start;
+  align-content: center;
+  max-width: 46rem;
+}
+
+/* Every animated element reads `--v` (0 to 1) written by the component. */
+.line {
+  --v: 0;
+  opacity: var(--v);
+  transform: translate3d(0, calc((1 - var(--v)) * 2.2rem), 0);
+  filter: blur(calc((1 - var(--v)) * 7px));
+  will-change: opacity, transform, filter;
+}
+
+.line :global(.eyebrow) {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.title {
+  font-size: clamp(2.25rem, 6.2vw, 4.75rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.35);
+}
+
+.lede {
+  max-width: 38rem;
+  font-size: clamp(1rem, 1.55vw, 1.25rem);
+  line-height: 1.55;
+  color: var(--text-invert-muted);
+  text-wrap: pretty;
+}
+
+/* ---- Bullet pairs ------------------------------------------------- */
+
+.points {
+  display: grid;
+  gap: clamp(0.9rem, 2vh, 1.35rem);
+  width: 100%;
+  max-width: 40rem;
+}
+
+.points li {
+  display: grid;
+  gap: 0.3rem;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--accent);
+}
+
+.term {
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.detail {
+  font-size: clamp(0.9rem, 1.25vw, 1.0625rem);
+  line-height: 1.5;
+  color: var(--text-invert-muted);
+}
+
+/* ---- CTA ---------------------------------------------------------- */
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.5rem;
+  padding: 1rem 1.75rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  box-shadow: 0 18px 45px -18px rgba(242, 84, 27, 0.9);
+  transition:
+    background 0.25s var(--ease-out),
+    transform 0.25s var(--ease-out);
+}
+
+.cta svg {
+  width: 1.15em;
+  height: 1.15em;
+  transition: transform 0.25s var(--ease-out);
+}
+
+.cta:hover {
+  background: var(--accent-hot);
+  transform: translateY(-2px);
+}
+
+.cta:hover svg {
+  transform: translateX(3px);
+}
+
+/* ---- Right-hand phase rail ---------------------------------------- */
+
+/* Only shown once the viewport is wide enough that the rail clears the
+   copy column (the copy runs to ~46rem inside the page gutter). */
+.rail {
+  display: none;
+  position: absolute;
+  right: clamp(1rem, 3vw, 2.5rem);
+  top: 50%;
+  translate: 0 -50%;
+  gap: 1.35rem;
+  pointer-events: none;
+}
+
+.rail li {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.railDot {
+  order: 2;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition:
+    background 0.4s var(--ease-out),
+    scale 0.4s var(--ease-out);
+}
+
+.railLabel {
+  order: 1;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  opacity: 0;
+  translate: 0.6rem 0;
+  transition:
+    opacity 0.4s var(--ease-out),
+    translate 0.4s var(--ease-out);
+}
+
+.rail li[data-active="true"] .railDot {
+  background: var(--accent);
+  scale: 1.45;
+}
+
+.rail li[data-active="true"] .railLabel {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* ---- Scroll hint + progress bar ----------------------------------- */
+
+.hint {
+  --v: 1;
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.5rem, 4vh, 2.75rem);
+  translate: -50% 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  opacity: var(--v);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  pointer-events: none;
+}
+
+.hintLine {
+  position: relative;
+  width: 1px;
+  height: 3rem;
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.hintLine::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 45%;
+  background: #fff;
+  animation: trickle 2s var(--ease-out) infinite;
+}
+
+@keyframes trickle {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(320%);
+  }
+}
+
+.bar {
+  --p: 0;
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--accent);
+  transform-origin: left;
+  scale: var(--p) 1;
+}
+
+/* ---- Responsive --------------------------------------------------- */
+
+@media (min-width: 1100px) {
+  .rail {
+    display: grid;
+  }
+}
+
+@media (max-width: 900px) {
+  .stage {
+    height: 520vh;
+  }
+
+  .copy {
+    align-items: flex-end;
+    padding-bottom: clamp(4.5rem, 12vh, 7rem);
+  }
+
+  .scrim {
+    background: linear-gradient(
+      to top,
+      rgba(4, 8, 13, 0.92) 0%,
+      rgba(4, 8, 13, 0.7) 45%,
+      rgba(4, 8, 13, 0.2) 80%,
+      transparent 100%
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line {
+    transform: none;
+    filter: none;
+  }
+
+  .hintLine::after {
+    animation: none;
+    transform: translateY(0);
+  }
+
+  .cta,
+  .cta svg,
+  .railDot,
+  .railLabel {
+    transition: none;
+  }
+}

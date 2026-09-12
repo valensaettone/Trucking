@@ -1,0 +1,178 @@
+/* ------------------------------------------------------------------ *
+ * Reliance Express Ltd. — design tokens & base styles
+ * ------------------------------------------------------------------ */
+
+:root {
+  /* Brand */
+  --ink: #070c13;
+  --ink-soft: #0d1622;
+  --ink-line: #1b2735;
+  --paper: #ffffff;
+  --surface: #f4f5f6;
+  --surface-2: #eceef0;
+
+  --accent: #f2541b;
+  --accent-hot: #ff6a30;
+  --accent-ink: #ffffff;
+
+  --text: #0b1119;
+  --text-muted: #5d6874;
+  --text-invert: #ffffff;
+  --text-invert-muted: rgba(255, 255, 255, 0.66);
+
+  --line: rgba(11, 17, 25, 0.12);
+  --line-invert: rgba(255, 255, 255, 0.16);
+
+  /* Type */
+  --font-sans: var(--font-geist-sans), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Rhythm */
+  --gutter: clamp(1.25rem, 5vw, 4.5rem);
+  --maxw: 78rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --background: var(--paper);
+  --foreground: var(--text);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Deliberately NOT `scroll-behavior: smooth`: it makes ScrollTrigger's own
+   scroll corrections animate, which jitters the scrubbed video. Anchor
+   smoothing is done per-click in `components/reveal.tsx` instead. */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---- Shared primitives ------------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 1.75rem;
+  height: 1px;
+  background: var(--accent);
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 200;
+  padding: 0.75rem 1.25rem;
+  background: var(--ink);
+  color: var(--text-invert);
+  border-radius: 0.5rem;
+  transition: top 0.2s var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  top: 1rem;
+}
+
+/* Scroll-in reveal. `components/reveal.tsx` flips the attribute to "in".
+   Global rather than module-scoped: CSS Modules reject selectors that are
+   not anchored on a local class. */
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 1.75rem, 0);
+  transition:
+    opacity 0.8s var(--ease-out),
+    transform 0.8s var(--ease-out);
+}
+
+[data-reveal="in"] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
