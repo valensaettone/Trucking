@@ -2,41 +2,70 @@ import Image from "next/image";
 
 import styles from "./sections.module.css";
 
-const SERVICES = [
+/**
+ * The seven services are laid out as a bento grid on a 12-column track. The
+ * spans run 5-4-3 / 3-4-5 so the two rows mirror each other, and the seventh
+ * — safety, the one that underwrites the other six — takes the full width as
+ * a dark feature panel. `tags` are micro-labels distilled from `body`.
+ */
+type Service = {
+  n: string;
+  title: string;
+  body: string;
+  tags: string[];
+  /** Column weight on the 12-column desktop grid. */
+  span: 3 | 4 | 5 | 12;
+};
+
+const SERVICES: Service[] = [
   {
     n: "01",
     title: "Local Transportation",
     body: "Same-day and next-day moves across the Greater Toronto Area, with dispatch that knows the lanes, the docks and the traffic windows.",
+    tags: ["Greater Toronto Area", "Same & next day"],
+    span: 5,
   },
   {
     n: "02",
     title: "Regional Transportation",
     body: "Scheduled and on-demand freight within Ontario and the surrounding provinces and states, sized to your volume.",
+    tags: ["Ontario & neighbours", "Scheduled or on demand"],
+    span: 4,
   },
   {
     n: "03",
     title: "Long-Haul Transportation",
     body: "Coast-to-coast and cross-border hauling throughout North America, tracked from pickup to final delivery.",
+    tags: ["North America", "Cross-border"],
+    span: 3,
   },
   {
     n: "04",
     title: "Expedited Shipping",
     body: "Dedicated equipment and direct routing for time-sensitive freight that has to arrive fast, and on schedule.",
+    tags: ["Dedicated equipment", "Direct routing"],
+    span: 3,
   },
   {
     n: "05",
     title: "Supply Chain Management",
     body: "We analyse your logistics requirements end to end, then design the transportation programme that fits them.",
+    tags: ["End to end", "Programme design"],
+    span: 4,
   },
   {
     n: "06",
     title: "Transportation Solutions",
     body: "Custom-built plans for unusual lanes, seasonal peaks and shipment profiles that do not fit a standard rate card.",
+    tags: ["Unusual lanes", "Seasonal peaks"],
+    span: 5,
   },
   {
     n: "07",
     title: "Safety-Focused Hauling",
     body: "Compliance, maintenance and driver standards held above the bar, because your freight and the road both depend on it.",
+    tags: ["Compliance", "Maintenance", "Driver standards"],
+    span: 12,
   },
 ];
 
@@ -60,29 +89,76 @@ const PILLARS = [
 ];
 
 export function Services() {
+  const cards = SERVICES.slice(0, -1);
+  const feature = SERVICES[SERVICES.length - 1];
+
   return (
     <section className={styles.services} id="services">
+      <div className={styles.glow} aria-hidden="true" />
+
       <div className="shell">
-        <header className={styles.sectionHead} data-reveal="">
-          <span className="eyebrow">What we move</span>
-          <h2 className={styles.sectionTitle}>
-            Seven ways Reliance Express keeps your freight moving
-          </h2>
-          <p className={styles.sectionLede}>
-            From a single local drop to a managed cross-border programme, every
-            service runs on the same fleet, the same dispatch desk and the same
-            safety standard.
-          </p>
+        <header className={styles.servicesHead}>
+          <div className={styles.headMain} data-reveal="">
+            <span className="eyebrow">What we move</span>
+            <h2 className={styles.servicesTitle}>
+              {/* The highlight behind "Seven ways" is painted by the reveal,
+                  so the count is what the eye lands on first. */}
+              <span className={styles.mark}>Seven ways</span> Reliance Express
+              keeps your freight moving
+            </h2>
+          </div>
+
+          <div className={styles.headAside} data-reveal="">
+            <p className={styles.sectionLede}>
+              From a single local drop to a managed cross-border programme,
+              every service runs on the same fleet, the same dispatch desk and
+              the same safety standard.
+            </p>
+            <p className={styles.count} aria-hidden="true">
+              <span>01</span>
+              <span className={styles.countRule} />
+              <span>07</span>
+            </p>
+          </div>
         </header>
 
         <ul className={styles.grid}>
-          {SERVICES.map((service) => (
-            <li key={service.n} className={styles.card} data-reveal="">
+          {cards.map((service) => (
+            <li
+              key={service.n}
+              className={styles.card}
+              data-span={service.span}
+              data-reveal=""
+            >
+              <span className={styles.rule} aria-hidden="true" />
               <span className={styles.cardNum}>{service.n}</span>
               <h3 className={styles.cardTitle}>{service.title}</h3>
               <p className={styles.cardBody}>{service.body}</p>
+              <ul className={styles.tags}>
+                {service.tags.map((tag) => (
+                  <li key={tag}>{tag}</li>
+                ))}
+              </ul>
+              <span className={styles.ghost} aria-hidden="true">
+                {service.n}
+              </span>
             </li>
           ))}
+
+          <li className={styles.feature} data-reveal="">
+            <div className={styles.featureBody}>
+              <span className={styles.cardNum}>{feature.n}</span>
+              <h3 className={styles.featureTitle}>{feature.title}</h3>
+              <p className={styles.featureText}>{feature.body}</p>
+            </div>
+            <ul className={styles.pills}>
+              {feature.tags.map((tag) => (
+                <li key={tag}>{tag}</li>
+              ))}
+            </ul>
+            {/* Road centre-line: dashes that run the width of the panel. */}
+            <span className={styles.lane} aria-hidden="true" />
+          </li>
         </ul>
       </div>
     </section>
@@ -134,8 +210,12 @@ export function Contact() {
             with a transportation plan and a rate.
           </p>
 
+          {/* Preview build: both buttons are inert on purpose. They keep the
+              real styling and focus behaviour, but no `mailto:` or `tel:`
+              is wired up, so a client walkthrough cannot open a mail client
+              or dial a placeholder number. */}
           <div className={styles.actions}>
-            <a className={styles.primary} href="mailto:info@relianceexpress.ca">
+            <button className={styles.primary} type="button">
               Get a Quote
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
@@ -147,10 +227,10 @@ export function Contact() {
                   strokeLinejoin="round"
                 />
               </svg>
-            </a>
-            <a className={styles.secondary} href="tel:+10000000000">
+            </button>
+            <button className={styles.secondary} type="button">
               Call dispatch
-            </a>
+            </button>
           </div>
 
           <dl className={styles.details}>

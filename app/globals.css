@@ -11,9 +11,21 @@
   --surface: #f4f5f6;
   --surface-2: #eceef0;
 
-  --accent: #f2541b;
-  --accent-hot: #ff6a30;
-  --accent-ink: #ffffff;
+  /* Sampled from `assets/logo.png`: the arrow is a gold gradient running
+     #e0a500 -> #fdd400, averaging #fbc400. Yellow is far too light to carry
+     white text, or small type on white, so the scale splits three ways:
+       --accent        fills, rules, and anything sitting over ink
+       --accent-hot    the lifted hover tone
+       --accent-deep   the only tone readable as small text on white (5.4:1)
+     `--accent-readable` picks between the last two by context: light surfaces
+     inherit the deep tone, dark sections re-point it at the pure gold. */
+  --accent: #fbc400;
+  --accent-hot: #ffd633;
+  --accent-deep: #8a6400;
+  --accent-ink: #0b1119;
+  --accent-readable: var(--accent-deep);
+  --accent-glow: rgba(251, 196, 0, 0.55);
+  --accent-wash: rgba(251, 196, 0, 0.2);
 
   --text: #0b1119;
   --text-muted: #5d6874;
@@ -99,10 +111,14 @@ button {
   cursor: pointer;
 }
 
+/* Gold sits at 1.6:1 against white, so the ring cannot rely on the accent
+   alone the way the old orange could. A dark halo underneath keeps it
+   visible on paper; the gold keeps it visible over the hero video. */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 2px;
+  box-shadow: 0 0 0 5px rgba(11, 17, 25, 0.24);
 }
 
 ::selection {
@@ -133,8 +149,8 @@ button {
 .eyebrow::before {
   content: "";
   width: 1.75rem;
-  height: 1px;
-  background: var(--accent);
+  height: 2px;
+  background: var(--accent-readable);
 }
 
 .skip-link {

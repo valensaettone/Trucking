@@ -1,6 +1,6 @@
 /* The `[data-reveal]` base transition is global (see `globals.css`);
    CSS Modules only accept selectors anchored on a local class.
-   Stagger the cards as the grid comes into view. */
+   Stagger the tiles as the grid comes into view. */
 .grid [data-reveal]:nth-child(2),
 .pillars [data-reveal]:nth-child(2) {
   transition-delay: 60ms;
@@ -25,14 +25,6 @@
 
 /* ---- Section furniture -------------------------------------------- */
 
-.sectionHead {
-  display: grid;
-  gap: 1.25rem;
-  justify-items: start;
-  max-width: 46rem;
-  margin-bottom: clamp(3rem, 7vw, 5rem);
-}
-
 .sectionTitle {
   font-size: clamp(1.9rem, 4vw, 3.1rem);
   font-weight: 600;
@@ -49,53 +41,210 @@
   text-wrap: pretty;
 }
 
-/* ---- Services ----------------------------------------------------- */
+/* ---- Services ------------------------------------------------------ *
+ * A bento grid rather than a uniform seven-up: the column spans mirror
+ * across the two rows (5-4-3 / 3-4-5), and safety — the one service that
+ * underwrites the other six — takes the full width as a dark feature panel.
+ * The section reads as a composition instead of a list.
+ * ------------------------------------------------------------------- */
 
 .services {
   position: relative;
   z-index: 1;
   padding-block: clamp(5rem, 12vw, 9rem);
   background: var(--paper);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: 1rem;
   overflow: hidden;
 }
 
-.card {
+/* One warm wash so the white does not sit flat behind the grid. */
+.glow {
+  position: absolute;
+  top: -18rem;
+  right: -12rem;
+  width: min(52rem, 110vw);
+  aspect-ratio: 1;
+  background: radial-gradient(circle, var(--accent-wash), transparent 66%);
+  pointer-events: none;
+}
+
+/* ---- Services header ----------------------------------------------- */
+
+.servicesHead {
   display: grid;
-  align-content: start;
-  gap: 0.75rem;
-  padding: clamp(1.75rem, 3vw, 2.5rem);
+  gap: clamp(1.75rem, 4vw, 3.5rem);
+  margin-bottom: clamp(2.75rem, 6vw, 4.5rem);
+  padding-bottom: clamp(2rem, 4vw, 2.75rem);
+  border-bottom: 1px solid var(--line);
+}
+
+.headMain {
+  display: grid;
+  gap: 1.25rem;
+  justify-items: start;
+}
+
+.headAside {
+  display: grid;
+  gap: 1.5rem;
+  align-content: end;
+}
+
+.servicesTitle {
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.034em;
+  text-wrap: balance;
+}
+
+/* Gold highlighter behind the count. Painted as a background so it always
+   sits under the glyphs, and swept open once the header reveals. */
+.mark {
+  padding-inline: 0.08em;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-position: 0 92%;
+  background-size: 0% 0.28em;
+  transition: background-size 0.9s 0.3s var(--ease-out);
+}
+
+.headMain[data-reveal="in"] .mark {
+  background-size: 100% 0.28em;
+}
+
+.count {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+
+.countRule {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--line));
+}
+
+@media (min-width: 62rem) {
+  .servicesHead {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: end;
+  }
+}
+
+/* ---- Grid ----------------------------------------------------------- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(0.85rem, 1.5vw, 1.25rem);
+}
+
+/* One column by default. The mirrored spans only make sense once there is
+   room for three tiles across. */
+.card,
+.feature {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 48rem) {
+  .card {
+    grid-column: span 6;
+  }
+}
+
+@media (min-width: 62rem) {
+  .card[data-span="3"] {
+    grid-column: span 3;
+  }
+  .card[data-span="4"] {
+    grid-column: span 4;
+  }
+  .card[data-span="5"] {
+    grid-column: span 5;
+  }
+}
+
+/* ---- Tile ----------------------------------------------------------- */
+
+.card {
+  position: relative;
+  display: grid;
+  /* index / title / body / tags. The 1fr on the body pins the tag row to the
+     bottom edge, so tags line up across a row even when the copy does not. */
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0.7rem;
+  padding: clamp(1.6rem, 2.6vw, 2.25rem);
   background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  overflow: hidden;
+  /* Its own stacking context, so the ghost numeral can sit at z-index -1
+     and still paint above the tile's background. */
+  isolation: isolate;
+  /* The opacity/transform pair repeats the global `[data-reveal]` transition:
+     same specificity, so this shorthand would otherwise drop it. */
   transition:
-    background 0.35s var(--ease-out),
+    background 0.4s var(--ease-out),
+    border-color 0.4s var(--ease-out),
+    box-shadow 0.4s var(--ease-out),
+    translate 0.4s var(--ease-out),
     opacity 0.8s var(--ease-out),
     transform 0.8s var(--ease-out);
 }
 
-.card:hover {
+.card:hover,
+.card:focus-within {
   background: var(--surface);
+  border-color: rgba(11, 17, 25, 0.18);
+  box-shadow: 0 24px 50px -34px rgba(11, 17, 25, 0.6);
+  translate: 0 -4px;
+}
+
+/* Gold rule that wipes across the top edge. */
+.rule {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hot));
+  transform-origin: left;
+  scale: 0 1;
+  transition: scale 0.5s var(--ease-out);
+}
+
+.card:hover .rule,
+.card:focus-within .rule {
+  scale: 1 1;
 }
 
 .cardNum {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.16em;
-  color: var(--accent);
+  color: var(--accent-readable);
+}
+
+.cardNum::after {
+  content: "";
+  width: 1.5rem;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
 }
 
 .cardTitle {
-  font-size: 1.25rem;
+  font-size: clamp(1.15rem, 1.5vw, 1.3125rem);
   font-weight: 600;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .cardBody {
@@ -103,6 +252,157 @@
   line-height: 1.6;
   color: var(--text-muted);
   text-wrap: pretty;
+}
+
+/* Outlined numeral cropped by the bottom corner, clearing the tag row so
+   it stays a watermark. It picks up the gold on hover, which is what ties
+   the grid back to the logo. */
+.ghost {
+  position: absolute;
+  right: -0.6rem;
+  bottom: -5.6rem;
+  z-index: -1;
+  font-family: var(--font-mono);
+  font-size: 9.5rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--ghost-ink, rgba(11, 17, 25, 0.08));
+  transition: translate 0.5s var(--ease-out);
+}
+
+.card:hover .ghost,
+.card:focus-within .ghost {
+  --ghost-ink: rgba(251, 196, 0, 0.9);
+  translate: 0 -0.4rem;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.8rem;
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tags li {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.tags li:not(:last-child)::after {
+  content: "";
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ---- Feature panel (07) --------------------------------------------- */
+
+.feature {
+  position: relative;
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: center;
+  padding: clamp(1.9rem, 3.4vw, 3rem);
+  padding-bottom: clamp(2.4rem, 3.8vw, 3.4rem);
+  background: var(--ink);
+  color: var(--text-invert);
+  border-radius: 1rem;
+  overflow: hidden;
+  /* Dark ground: the accent can be the pure gold here. */
+  --accent-readable: var(--accent);
+  transition:
+    opacity 0.8s var(--ease-out),
+    transform 0.8s var(--ease-out);
+}
+
+.feature::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    72% 130% at 92% 0%,
+    rgba(251, 196, 0, 0.22),
+    transparent 66%
+  );
+  pointer-events: none;
+}
+
+.featureBody {
+  position: relative;
+  display: grid;
+  gap: 0.85rem;
+  justify-items: start;
+  max-width: 44rem;
+}
+
+.featureTitle {
+  font-size: clamp(1.5rem, 2.7vw, 2.15rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.featureText {
+  font-size: clamp(0.9688rem, 1.2vw, 1.0625rem);
+  line-height: 1.6;
+  color: var(--text-invert-muted);
+  text-wrap: pretty;
+}
+
+.pills {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pills li {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--line-invert);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Dashed road centre-line running the width of the panel. */
+.lane {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0 2.75rem,
+    transparent 2.75rem 5.5rem
+  );
+  opacity: 0.8;
+  animation: lane-run 3.4s linear infinite;
+}
+
+@keyframes lane-run {
+  to {
+    background-position: -5.5rem 0;
+  }
+}
+
+@media (min-width: 62rem) {
+  .feature {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(2rem, 4vw, 4rem);
+  }
 }
 
 /* ---- Why us ------------------------------------------------------- */
@@ -165,6 +465,8 @@
 /* ---- Contact ------------------------------------------------------ */
 
 .contact {
+  /* Dark ground: the accent can be the pure logo gold here. */
+  --accent-readable: var(--accent);
   position: relative;
   z-index: 1;
   padding-block: clamp(5.5rem, 13vw, 10rem);
@@ -179,7 +481,7 @@
   inset: 0;
   background: radial-gradient(
     58% 70% at 85% 10%,
-    rgba(242, 84, 27, 0.24),
+    rgba(251, 196, 0, 0.22),
     transparent 70%
   );
   pointer-events: none;
@@ -239,7 +541,7 @@
 .primary {
   background: var(--accent);
   color: var(--accent-ink);
-  box-shadow: 0 18px 45px -18px rgba(242, 84, 27, 0.9);
+  box-shadow: 0 18px 45px -18px var(--accent-glow);
 }
 
 .primary svg {
@@ -294,6 +596,7 @@
 /* ---- Footer ------------------------------------------------------- */
 
 .footer {
+  --accent-readable: var(--accent);
   position: relative;
   z-index: 1;
   padding-block: 2.5rem;
@@ -333,9 +636,24 @@
 
 @media (prefers-reduced-motion: reduce) {
   .card,
+  .rule,
+  .ghost,
+  .feature,
   .primary,
   .primary svg,
   .secondary {
     transition: none;
+  }
+
+  /* The highlighter and the road stripes are the two things that move on
+     their own; settle both into their end state. */
+  .mark,
+  .headMain[data-reveal="in"] .mark {
+    background-size: 100% 0.28em;
+    transition: none;
+  }
+
+  .lane {
+    animation: none;
   }
 }
